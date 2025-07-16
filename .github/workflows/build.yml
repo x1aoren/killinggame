@@ -14,7 +14,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -22,8 +23,12 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
+    - name: Ensure proper line endings and download wrapper
+      run: |
+        sed -i 's/\r$//' gradlew
+        chmod +x gradlew
+        mkdir -p gradle/wrapper
+        curl -o gradle/wrapper/gradle-wrapper.jar https://github.com/gradle/gradle/raw/v8.5.0/gradle/wrapper/gradle-wrapper.jar
     
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
