@@ -206,7 +206,7 @@ public class GameManager {
                 for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
                     serverPlayer.sendMessage(Text.literal(winnerMessage));
                     // 使用新的title API
-                    serverPlayer.showTitle(net.minecraft.entity.boss.BossBar.Color.YELLOW, title, subtitle, 10, 70, 20);
+                    serverPlayer.sendTitle(title, subtitle, 10, 70, 20);
                 }
                 
                 // 停止游戏
