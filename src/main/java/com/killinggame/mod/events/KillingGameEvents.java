@@ -22,8 +22,13 @@ public class KillingGameEvents {
             // 检查击杀者是否是玩家
             if (entity instanceof ServerPlayerEntity player) {
                 if (killedEntity instanceof LivingEntity livingEntity) {
-                    // 触发击杀处理
-                    KillingGameMod.GAME_MANAGER.onEntityKilled(player, livingEntity.getType());
+                    if (killedEntity instanceof ServerPlayerEntity victim) {
+                        // 玩家击杀玩家
+                        KillingGameMod.GAME_MANAGER.onPlayerKilled(player, victim);
+                    } else {
+                        // 玩家击杀生物
+                        KillingGameMod.GAME_MANAGER.onEntityKilled(player, livingEntity.getType());
+                    }
                 }
             }
         });
