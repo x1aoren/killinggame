@@ -3,6 +3,7 @@ package com.killinggame.mod.events;
 import com.killinggame.mod.KillingGameMod;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityCombatEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.MinecraftServer;
@@ -36,6 +37,16 @@ public class KillingGameEvents {
         // 注册tick事件（用于更新游戏状态）
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             KillingGameMod.GAME_MANAGER.tick();
+        });
+        
+        // 注册服务器启动事件
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            KillingGameMod.setServer(server);
+        });
+        
+        // 注册服务器停止事件
+        ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+            KillingGameMod.setServer(null);
         });
     }
 } 
