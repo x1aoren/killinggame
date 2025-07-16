@@ -22,15 +22,19 @@ public class KillingGameMod implements ModInitializer {
     public void onInitialize() {
         LOGGER.info("杀戮游戏模组初始化");
         
-        // 注册指令
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            KillingGameCommand.register(dispatcher);
-        });
-        
-        // 注册事件
-        KillingGameEvents.registerEvents();
-        
-        LOGGER.info("杀戮游戏模组已加载完成");
+        try {
+            // 注册指令
+            CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+                KillingGameCommand.register(dispatcher);
+            });
+            
+            // 注册事件
+            KillingGameEvents.registerEvents();
+            
+            LOGGER.info("杀戮游戏模组已加载完成");
+        } catch (Exception e) {
+            LOGGER.error("杀戮游戏模组初始化失败", e);
+        }
     }
     
     /**
