@@ -8,9 +8,11 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ScoreboardDisplaySlot;
+import net.minecraft.scoreboard.ScoreHolder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -88,7 +90,8 @@ public class GameManager {
         
         // 设置所有玩家的初始轮数为1
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            scoreboard.getOrCreateScore(player.getName().getString(), objective).setScore(1);
+            ScoreHolder scoreHolder = ScoreHolder.fromName(player.getName().getString());
+            scoreboard.getOrCreateScore(scoreHolder, objective).setScore(1);
             assignNewTarget(player);
             playerCompletedRound.put(player.getUuid(), false);
         }
@@ -157,9 +160,10 @@ public class GameManager {
             } else {
                 // 已完成目标的玩家增加轮数
                 String playerName = player.getName().getString();
-                int currentRound = scoreboard.getOrCreateScore(playerName, objective).getScore();
+                ScoreHolder scoreHolder = ScoreHolder.fromName(playerName);
+                int currentRound = scoreboard.getOrCreateScore(scoreHolder, objective).getScore();
                 if (currentRound < MAX_ROUNDS) {
-                    scoreboard.getOrCreateScore(playerName, objective).setScore(currentRound + 1);
+                    scoreboard.getOrCreateScore(scoreHolder, objective).setScore(currentRound + 1);
                     broadcastMessage("§e玩家 §f" + playerName + " §a进入第 §6" + (currentRound + 1) + " §a轮！");
                 }
             }
@@ -185,7 +189,8 @@ public class GameManager {
         
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             String playerName = player.getName().getString();
-            int currentRound = scoreboard.getOrCreateScore(playerName, objective).getScore();
+            ScoreHolder scoreHolder = ScoreHolder.fromName(playerName);
+            int currentRound = scoreboard.getOrCreateScore(scoreHolder, objective).getScore();
             
             if (currentRound > MAX_ROUNDS) {
                 // 宣布获胜者
@@ -200,7 +205,8 @@ public class GameManager {
                 
                 for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
                     serverPlayer.sendMessage(Text.literal(winnerMessage));
-                    serverPlayer.sendTitle(title, subtitle, 10, 70, 20);
+                    // 使用新的title API
+                    serverPlayer.showTitle(title, subtitle, 10, 70, 20);
                 }
                 
                 // 停止游戏
@@ -260,7 +266,8 @@ public class GameManager {
         playerCompletedRound.put(playerUUID, true);
         
         // 获取当前轮数
-        int currentRound = scoreboard.getOrCreateScore(playerName, objective).getScore();
+        ScoreHolder scoreHolder = ScoreHolder.fromName(playerName);
+        int currentRound = scoreboard.getOrCreateScore(scoreHolder, objective).getScore();
         
         // 提示玩家已完成目标
         Text message = Text.literal(TextUtils.formatText("&a恭喜！你成功击杀了目标: &e" + targetName));
@@ -268,7 +275,7 @@ public class GameManager {
         
         // 如果是最后一轮，直接增加分数并检查获胜
         if (currentRound >= MAX_ROUNDS) {
-            scoreboard.getOrCreateScore(playerName, objective).setScore(currentRound + 1);
+            scoreboard.getOrCreateScore(scoreHolder, objective).setScore(currentRound + 1);
             checkForWinner(server);
             return;
         }
