@@ -7,7 +7,6 @@ import net.minecraft.registry.Registries;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ScoreboardCriterion;
 import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -154,11 +153,11 @@ public class GameManager {
                 broadcastMessage("§e玩家 §f" + player.getName().getString() + " §c未能在规定时间内完成目标！");
             } else {
                 // 已完成目标的玩家增加轮数
-                ScoreboardPlayerScore playerScore = scoreboard.getPlayerScore(player.getName().getString(), objective);
-                int currentRound = playerScore.getScore();
+                String playerName = player.getName().getString();
+                int currentRound = scoreboard.getPlayerScore(playerName, objective).getScore();
                 if (currentRound < MAX_ROUNDS) {
-                    playerScore.setScore(currentRound + 1);
-                    broadcastMessage("§e玩家 §f" + player.getName().getString() + " §a进入第 §6" + (currentRound + 1) + " §a轮！");
+                    scoreboard.getPlayerScore(playerName, objective).setScore(currentRound + 1);
+                    broadcastMessage("§e玩家 §f" + playerName + " §a进入第 §6" + (currentRound + 1) + " §a轮！");
                 }
             }
             
@@ -182,19 +181,19 @@ public class GameManager {
         }
         
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            ScoreboardPlayerScore playerScore = scoreboard.getPlayerScore(player.getName().getString(), objective);
-            int currentRound = playerScore.getScore();
+            String playerName = player.getName().getString();
+            int currentRound = scoreboard.getPlayerScore(playerName, objective).getScore();
             
             if (currentRound > MAX_ROUNDS) {
                 // 宣布获胜者
-                String winnerMessage = "§6§l恭喜玩家 §e" + player.getName().getString() + " §6§l完成全部 " + MAX_ROUNDS + " 轮挑战，获得胜利！";
+                String winnerMessage = "§6§l恭喜玩家 §e" + playerName + " §6§l完成全部 " + MAX_ROUNDS + " 轮挑战，获得胜利！";
                 
                 // 在聊天栏广播
                 broadcastMessage(winnerMessage);
                 
                 // 使用title展示
                 Text title = Text.literal(TextUtils.formatText("&6&l游戏结束"));
-                Text subtitle = Text.literal(TextUtils.formatText("&e" + player.getName().getString() + " &a获得胜利！"));
+                Text subtitle = Text.literal(TextUtils.formatText("&e" + playerName + " &a获得胜利！"));
                 
                 for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
                     serverPlayer.sendMessage(Text.literal(winnerMessage));
@@ -212,128 +211,115 @@ public class GameManager {
      * 处理实体被击杀事件
      */
     public void onEntityKilled(ServerPlayerEntity player, EntityType<?> entityType) {
-        if (!gameActive) {
-            return;
-        }
+        if (!gameActive) return;
         
         UUID playerUUID = player.getUuid();
+        Object target = targetMap.get(playerUUID);
         
-        // 检查目标是否为实体而非玩家
-        if (!isPlayerTarget.getOrDefault(playerUUID, false)) {
-            Object target = targetMap.get(playerUUID);
-            if (target instanceof EntityType && (EntityType<?>)target == entityType) {
-                completeRound(player, getEntityName(entityType));
-            }
+        // 检查目标是否为实体类型，并且与击杀的实体类型匹配
+        if (target instanceof EntityType && target.equals(entityType) && !isPlayerTarget.getOrDefault(playerUUID, false)) {
+            String entityName = getEntityName(entityType);
+            completeRound(player, entityName);
         }
     }
     
     /**
-     * 处理玩家击杀玩家事件
+     * 处理玩家被击杀事件
      */
     public void onPlayerKilled(ServerPlayerEntity killer, ServerPlayerEntity victim) {
-        if (!gameActive) {
-            return;
-        }
+        if (!gameActive) return;
         
         UUID killerUUID = killer.getUuid();
+        Object target = targetMap.get(killerUUID);
         
-        // 检查目标是否为玩家
-        if (isPlayerTarget.getOrDefault(killerUUID, false)) {
-            Object target = targetMap.get(killerUUID);
-            if (target instanceof UUID && target.equals(victim.getUuid())) {
-                completeRound(killer, victim.getName().getString());
-            }
+        // 检查目标是否为玩家UUID，并且与被击杀的玩家UUID匹配
+        if (target instanceof UUID && target.equals(victim.getUuid()) && isPlayerTarget.getOrDefault(killerUUID, true)) {
+            String victimName = victim.getName().getString();
+            completeRound(killer, victimName);
         }
     }
     
     /**
-     * 完成当前轮次
+     * 完成一轮
      */
     private void completeRound(ServerPlayerEntity player, String targetName) {
-        MinecraftServer server = player.getServer();
-        if (server == null) {
-            return;
-        }
+        MinecraftServer server = getServer();
+        if (server == null) return;
         
         Scoreboard scoreboard = server.getScoreboard();
         ScoreboardObjective objective = scoreboard.getObjective("轮数");
-        if (objective == null) {
+        if (objective == null) return;
+        
+        UUID playerUUID = player.getUuid();
+        String playerName = player.getName().getString();
+        
+        // 标记玩家已完成本轮
+        playerCompletedRound.put(playerUUID, true);
+        
+        // 获取当前轮数
+        int currentRound = scoreboard.getPlayerScore(playerName, objective).getScore();
+        
+        // 提示玩家已完成目标
+        Text message = Text.literal(TextUtils.formatText("&a恭喜！你成功击杀了目标: &e" + targetName));
+        player.sendMessage(message, false);
+        
+        // 如果是最后一轮，直接增加分数并检查获胜
+        if (currentRound >= MAX_ROUNDS) {
+            scoreboard.getPlayerScore(playerName, objective).setScore(currentRound + 1);
+            checkForWinner(server);
             return;
         }
         
-        ScoreboardPlayerScore playerScore = scoreboard.getPlayerScore(player.getName().getString(), objective);
-        int currentRound = playerScore.getScore();
-        
-        // 标记玩家已完成本轮目标
-        playerCompletedRound.put(player.getUuid(), true);
-        
-        // 发送完成信息
-        player.sendMessage(Text.literal(TextUtils.formatText("&a你成功击杀了目标 &e" + targetName + "&a！")));
-        
-        // 如果是最后一轮，立即检查获胜
-        if (currentRound >= MAX_ROUNDS) {
-            playerScore.setScore(MAX_ROUNDS + 1);
-            checkForWinner(server);
-        }
+        // 分配新的目标
+        assignNewTarget(player);
     }
     
     /**
      * 为玩家分配新的目标
      */
     public void assignNewTarget(ServerPlayerEntity player) {
-        if (!gameActive) {
-            return;
-        }
+        UUID playerUUID = player.getUuid();
+        MinecraftServer server = getServer();
         
-        MinecraftServer server = player.getServer();
-        if (server == null) {
-            return;
-        }
+        if (server == null) return;
         
-        List<ServerPlayerEntity> allPlayers = server.getPlayerManager().getPlayerList();
+        // 决定目标是实体还是玩家 (30%几率是玩家)
+        boolean isPlayerTargetType = ThreadLocalRandom.current().nextDouble() < PLAYER_TARGET_CHANCE;
         
-        // 如果只有一个玩家，目标只能是生物
-        if (allPlayers.size() <= 1 || ThreadLocalRandom.current().nextDouble() > PLAYER_TARGET_CHANCE) {
-            // 随机选择生物作为目标
-            EntityType<?> randomEntity = possibleTargets.get(ThreadLocalRandom.current().nextInt(possibleTargets.size()));
-            targetMap.put(player.getUuid(), randomEntity);
-            isPlayerTarget.put(player.getUuid(), false);
+        // 获取可能的玩家目标列表（排除自己）
+        List<ServerPlayerEntity> possiblePlayerTargets = server.getPlayerManager().getPlayerList().stream()
+                .filter(p -> !p.getUuid().equals(playerUUID))
+                .collect(Collectors.toList());
+        
+        // 如果没有其他玩家或随机决定目标是实体，则分配实体目标
+        if (possiblePlayerTargets.isEmpty() || !isPlayerTargetType) {
+            EntityType<?> targetEntity = getRandomTarget();
+            targetMap.put(playerUUID, targetEntity);
+            isPlayerTarget.put(playerUUID, false);
             
-            String targetName = getEntityName(randomEntity);
-            player.sendMessage(Text.literal(TextUtils.formatText("&6本轮击杀目标: &e" + targetName)), true);
+            String entityName = getEntityName(targetEntity);
+            Text message = Text.literal(TextUtils.formatText("&e你的新目标是: &c" + entityName));
+            player.sendMessage(message, false);
         } else {
-            // 随机选择一名其他玩家作为目标
-            List<ServerPlayerEntity> otherPlayers = allPlayers.stream()
-                    .filter(p -> !p.getUuid().equals(player.getUuid()))
-                    .collect(Collectors.toList());
+            // 分配玩家目标
+            ServerPlayerEntity targetPlayer = possiblePlayerTargets.get(ThreadLocalRandom.current().nextInt(possiblePlayerTargets.size()));
+            targetMap.put(playerUUID, targetPlayer.getUuid());
+            isPlayerTarget.put(playerUUID, true);
             
-            if (!otherPlayers.isEmpty()) {
-                ServerPlayerEntity targetPlayer = otherPlayers.get(ThreadLocalRandom.current().nextInt(otherPlayers.size()));
-                targetMap.put(player.getUuid(), targetPlayer.getUuid());
-                isPlayerTarget.put(player.getUuid(), true);
-                
-                player.sendMessage(Text.literal(TextUtils.formatText("&6本轮击杀目标: &c玩家 &e" + targetPlayer.getName().getString())), true);
-            } else {
-                // 如果没有其他玩家（理论上不应该发生），选择生物
-                EntityType<?> randomEntity = possibleTargets.get(ThreadLocalRandom.current().nextInt(possibleTargets.size()));
-                targetMap.put(player.getUuid(), randomEntity);
-                isPlayerTarget.put(player.getUuid(), false);
-                
-                String targetName = getEntityName(randomEntity);
-                player.sendMessage(Text.literal(TextUtils.formatText("&6本轮击杀目标: &e" + targetName)), true);
-            }
+            Text message = Text.literal(TextUtils.formatText("&e你的新目标是玩家: &c" + targetPlayer.getName().getString()));
+            player.sendMessage(message, false);
         }
     }
     
     /**
-     * 随机获取一个目标实体
+     * 获取随机目标实体类型
      */
     private EntityType<?> getRandomTarget() {
         return possibleTargets.get(ThreadLocalRandom.current().nextInt(possibleTargets.size()));
     }
     
     /**
-     * 获取实体的显示名称
+     * 获取实体类型的显示名称
      */
     private String getEntityName(EntityType<?> entityType) {
         return Registries.ENTITY_TYPE.getId(entityType).getPath();
@@ -345,41 +331,39 @@ public class GameManager {
     private void broadcastMessage(String message) {
         MinecraftServer server = getServer();
         if (server != null) {
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                player.sendMessage(Text.literal(message));
-            }
+            Text text = Text.literal(message);
+            server.getPlayerManager().broadcast(text, false);
         }
-        KillingGameMod.LOGGER.info(message);
     }
     
     /**
-     * 获取当前服务器实例
+     * 获取服务器实例
      */
     private MinecraftServer getServer() {
         try {
-            return net.minecraft.server.MinecraftServer.getServer();
+            return KillingGameMod.SERVER;
         } catch (Exception e) {
-            KillingGameMod.LOGGER.error("无法获取服务器实例", e);
+            e.printStackTrace();
             return null;
         }
     }
     
     /**
-     * 游戏是否活跃
+     * 获取游戏活跃状态
      */
     public boolean isGameActive() {
         return gameActive;
     }
     
     /**
-     * 检查目标是否为玩家
+     * 检查玩家的目标是否为其他玩家
      */
     public boolean isTargetPlayer(UUID playerUUID) {
         return isPlayerTarget.getOrDefault(playerUUID, false);
     }
     
     /**
-     * 获取玩家的目标（可能是EntityType或玩家UUID）
+     * 获取玩家的目标
      */
     public Object getPlayerTarget(UUID playerUUID) {
         return targetMap.get(playerUUID);
