@@ -1,0 +1,90 @@
+package com.killinggame.mod.commands;
+
+import com.killinggame.mod.KillingGameMod;
+import com.killinggame.mod.utils.TextUtils;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.text.Text;
+
+/**
+ * 杀戮游戏命令处理类
+ */
+public class KillingGameCommand {
+
+    /**
+     * 注册命令
+     */
+    public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+        dispatcher.register(CommandManager.literal("killinggame")
+                .requires(source -> source.hasPermissionLevel(2)) // 需要权限等级2（OP）
+                .then(CommandManager.literal("start")
+                        .executes(KillingGameCommand::startGame))
+                .then(CommandManager.literal("stop")
+                        .executes(KillingGameCommand::stopGame))
+                .then(CommandManager.literal("status")
+                        .executes(KillingGameCommand::getGameStatus))
+                .then(CommandManager.literal("help")
+                        .executes(KillingGameCommand::showHelp)));
+    }
+
+    /**
+     * 开始游戏命令处理
+     */
+    private static int startGame(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (KillingGameMod.GAME_MANAGER.isGameActive()) {
+            source.sendFeedback(() -> Text.literal(TextUtils.formatText("&c游戏已经在进行中！")), false);
+            return 0;
+        }
+        
+        KillingGameMod.GAME_MANAGER.startGame(source.getServer());
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&a杀戮游戏已开始！")), true);
+        return 1;
+    }
+
+    /**
+     * 停止游戏命令处理
+     */
+    private static int stopGame(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        if (!KillingGameMod.GAME_MANAGER.isGameActive()) {
+            source.sendFeedback(() -> Text.literal(TextUtils.formatText("&c游戏尚未开始！")), false);
+            return 0;
+        }
+        
+        KillingGameMod.GAME_MANAGER.stopGame(source.getServer());
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&c杀戮游戏已停止！")), true);
+        return 1;
+    }
+
+    /**
+     * 获取游戏状态命令处理
+     */
+    private static int getGameStatus(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        boolean isActive = KillingGameMod.GAME_MANAGER.isGameActive();
+        String status = isActive ? "&a正在进行" : "&c未开始";
+        
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6杀戮游戏状态：" + status)), false);
+        return 1;
+    }
+
+    /**
+     * 显示帮助命令处理
+     */
+    private static int showHelp(CommandContext<ServerCommandSource> context) {
+        ServerCommandSource source = context.getSource();
+        
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6===== &e杀戮游戏指令帮助 &6=====")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame start &7- &f开始游戏")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame stop &7- &f停止游戏")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame status &7- &f查看游戏状态")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame help &7- &f显示此帮助")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6========================")), false);
+        
+        return 1;
+    }
+} 
