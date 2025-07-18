@@ -206,7 +206,9 @@ public class GameManager {
                 for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
                     serverPlayer.sendMessage(Text.literal(winnerMessage));
                     // 使用新的title API
-                    serverPlayer.sendTitle(title, subtitle, 10, 70, 20);
+                    serverPlayer.sendTitleFadeTime(10, 70, 20);
+                    serverPlayer.sendTitle(title);
+                    serverPlayer.sendSubtitle(subtitle);
                 }
                 
                 // 停止游戏
