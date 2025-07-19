@@ -10,7 +10,7 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 
 /**
- * 杀戮游戏命令处理类
+ * 生物大逃杀命令处理类
  */
 public class KillingGameCommand {
 
@@ -41,7 +41,7 @@ public class KillingGameCommand {
         }
         
         KillingGameMod.GAME_MANAGER.startGame(source.getServer());
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&a杀戮游戏已开始！")), true);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&a生物大逃杀已开始！")), true);
         return 1;
     }
 
@@ -56,7 +56,7 @@ public class KillingGameCommand {
         }
         
         KillingGameMod.GAME_MANAGER.stopGame(source.getServer());
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&c杀戮游戏已停止！")), true);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&c生物大逃杀已停止！")), true);
         return 1;
     }
 
@@ -68,7 +68,7 @@ public class KillingGameCommand {
         boolean isActive = KillingGameMod.GAME_MANAGER.isGameActive();
         String status = isActive ? "&a正在进行" : "&c未开始";
         
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6杀戮游戏状态：" + status)), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6生物大逃杀状态：" + status)), false);
         return 1;
     }
 
@@ -78,7 +78,7 @@ public class KillingGameCommand {
     private static int showHelp(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6===== &e杀戮游戏指令帮助 &6=====")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6===== &e生物大逃杀指令帮助 &6=====")), false);
         source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame start &7- &f开始游戏")), false);
         source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame stop &7- &f停止游戏")), false);
         source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame status &7- &f查看游戏状态")), false);

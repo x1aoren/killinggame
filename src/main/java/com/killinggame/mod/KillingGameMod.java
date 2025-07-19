@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 杀戮游戏主模组类
+ * 生物大逃杀主模组类
  */
 public class KillingGameMod implements ModInitializer {
     public static final String MOD_ID = "killinggame";
@@ -24,7 +24,7 @@ public class KillingGameMod implements ModInitializer {
     
     @Override
     public void onInitialize() {
-        LOGGER.info("杀戮游戏模组初始化");
+        LOGGER.info("生物大逃杀模组初始化");
         
         try {
             // 注册指令
@@ -35,9 +35,9 @@ public class KillingGameMod implements ModInitializer {
             // 注册事件
             KillingGameEvents.registerEvents();
             
-            LOGGER.info("杀戮游戏模组已加载完成");
+            LOGGER.info("生物大逃杀模组已加载完成");
         } catch (Exception e) {
-            LOGGER.error("杀戮游戏模组初始化失败", e);
+            LOGGER.error("生物大逃杀模组初始化失败", e);
         }
     }
     

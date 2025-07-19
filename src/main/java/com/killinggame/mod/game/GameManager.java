@@ -84,7 +84,7 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         objective = scoreboard.addObjective("轮数", ScoreboardCriterion.DUMMY, 
-            Text.literal("§6§l杀戮游戏 §f- §e轮数"), ScoreboardCriterion.RenderType.INTEGER, 
+            Text.literal("§6§l生物大逃杀 §f- §e轮数"), ScoreboardCriterion.RenderType.INTEGER, 
             true, null);
         scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, objective); // 显示在记分板侧边
         
@@ -96,7 +96,7 @@ public class GameManager {
             playerCompletedRound.put(player.getUuid(), false);
         }
         
-        broadcastMessage("§6§l杀戮游戏 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
+        broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
         broadcastMessage("§e总共有 §c" + MAX_ROUNDS + " §e轮，每轮间隔 §c" + ROUND_TIME_MINUTES + " §e分钟。");
         broadcastMessage("§b祝你好运！");
         broadcastMessage("§d提示：目标可能是生物，也可能是其他玩家！");
@@ -119,7 +119,7 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         
-        broadcastMessage("§6§l杀戮游戏 §c已停止！");
+        broadcastMessage("§6§l生物大逃杀 §c已停止！");
     }
     
     /**

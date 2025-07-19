@@ -10,7 +10,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
- * 杀戮游戏事件处理器
+ * 生物大逃杀事件处理器
  */
 public class KillingGameEvents {
     
