@@ -5,7 +5,7 @@
   "name": "生物大逃杀",
   "description": "一个多人游戏模式，玩家需要击杀特定生物来完成挑战。每轮玩家需要击杀指定生物才能进入下一轮，总共8轮。谁先完成所有轮数，谁就获胜！",
   "authors": [
-    "KillingGame"
+    "任性咩 & 小任君呀"
   ],
   "contact": {
     "homepage": "https://github.com/x1aoren/killinggame",
