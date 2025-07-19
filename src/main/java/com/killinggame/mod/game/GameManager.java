@@ -104,7 +104,7 @@ public class GameManager {
             playerCompletedRound.put(player.getUuid(), false);
             // 加入蓝色队伍
             if (blueTeam != null) {
-                scoreboard.addPlayerToTeam(player.getName().getString(), blueTeam);
+                blueTeam.addPlayer(player.getName().getString());
             }
         }
         
@@ -345,14 +345,26 @@ public class GameManager {
             String entityName = getEntityName(targetEntity);
             Text message = Text.literal(TextUtils.formatText("&e你的新目标是: &c" + entityName));
             player.sendMessage(message, false);
+            // 动作栏显示
+            String actionbar = "{\"text\":\"§b你的新目标是: §c" + entityName + "\"}";
+            server.getCommandManager().executeWithPrefix(
+                player.getCommandSource(),
+                "title @s actionbar " + actionbar
+            );
         } else {
             // 分配玩家目标
             ServerPlayerEntity targetPlayer = possiblePlayerTargets.get(ThreadLocalRandom.current().nextInt(possiblePlayerTargets.size()));
             targetMap.put(playerUUID, targetPlayer.getUuid());
             isPlayerTarget.put(playerUUID, true);
             
-            Text message = Text.literal(TextUtils.formatText("&e你的新目标是玩家: &c" + targetPlayer.getName().getString()));
+            Text message = Text.literal(TextUtils.formatText("&e你的新目标是玩家: &d" + targetPlayer.getName().getString()));
             player.sendMessage(message, false);
+            // 动作栏显示
+            String actionbar = "{\"text\":\"§b你的新目标是玩家: §d" + targetPlayer.getName().getString() + "\"}";
+            server.getCommandManager().executeWithPrefix(
+                player.getCommandSource(),
+                "title @s actionbar " + actionbar
+            );
         }
     }
     
