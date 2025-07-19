@@ -84,7 +84,7 @@ public class GameManager {
         // 关闭命令方块输出，减少聊天栏干扰
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
-            "gamerule sendCommandFeedback false"
+            "gamerule commandBlockOutput false"
         );
         
         gameActive = true;
@@ -157,7 +157,7 @@ public class GameManager {
         // 恢复命令方块输出
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
-            "gamerule sendCommandFeedback true"
+            "gamerule commandBlockOutput true"
         );
         
         broadcastMessage("§6§l生物大逃杀 §c已停止！");
@@ -188,20 +188,15 @@ public class GameManager {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 Object target = targetMap.get(player.getUuid());
                 boolean isPlayer = isPlayerTarget.getOrDefault(player.getUuid(), false);
-                String actionbar;
                 if (target != null) {
                     if (isPlayer) {
                         String name = server.getPlayerManager().getPlayer((UUID)target) != null ?
                             server.getPlayerManager().getPlayer((UUID)target).getName().getString() : "目标玩家";
-                        actionbar = "{\"text\":\"§b你的目标: §d" + name + "\",\"bold\":true}";
+                        player.sendMessage(Text.literal("§b你的目标: §d" + name).styled(style -> style.withBold(true)), true);
                     } else {
                         String entityName = getEntityName((EntityType<?>)target);
-                        actionbar = "{\"text\":\"§b你的目标: §c" + entityName + "\",\"bold\":true}";
+                        player.sendMessage(Text.literal("§b你的目标: §c" + entityName).styled(style -> style.withBold(true)), true);
                     }
-                    server.getCommandManager().executeWithPrefix(
-                        player.getCommandSource(),
-                        "title @s actionbar " + actionbar
-                    );
                 }
             }
         }
@@ -402,11 +397,7 @@ public class GameManager {
             Text message = Text.literal(TextUtils.formatText("&e你的新目标是: &c" + entityName));
             player.sendMessage(message, false);
             // 动作栏显示
-            String actionbar = "{\"text\":\"§b你的新目标是: §c" + entityName + "\"}";
-            server.getCommandManager().executeWithPrefix(
-                player.getCommandSource(),
-                "title @s actionbar " + actionbar
-            );
+            player.sendMessage(Text.literal("§b你的目标: §c" + entityName).styled(style -> style.withBold(true)), true);
         } else {
             // 分配玩家目标
             ServerPlayerEntity targetPlayer = possiblePlayerTargets.get(ThreadLocalRandom.current().nextInt(possiblePlayerTargets.size()));
@@ -417,11 +408,7 @@ public class GameManager {
             Text message = Text.literal(TextUtils.formatText("&e你的新目标是玩家: &d" + targetPlayer.getName().getString()));
             player.sendMessage(message, false);
             // 动作栏显示
-            String actionbar = "{\"text\":\"§b你的新目标是玩家: §d" + targetPlayer.getName().getString() + "\"}";
-            server.getCommandManager().executeWithPrefix(
-                player.getCommandSource(),
-                "title @s actionbar " + actionbar
-            );
+            player.sendMessage(Text.literal("§b你的目标: §d" + targetPlayer.getName().getString()).styled(style -> style.withBold(true)), true);
         }
     }
     
