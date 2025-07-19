@@ -182,6 +182,29 @@ public class GameManager {
         if (currentTick % roundTimeTicks == 0) {
             updateRounds(server);
         }
+        
+        // 每秒刷新一次动作栏目标提示
+        if (currentTick % 20 == 0) {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                Object target = targetMap.get(player.getUuid());
+                boolean isPlayer = isPlayerTarget.getOrDefault(player.getUuid(), false);
+                String actionbar;
+                if (target != null) {
+                    if (isPlayer) {
+                        String name = server.getPlayerManager().getPlayer((UUID)target) != null ?
+                            server.getPlayerManager().getPlayer((UUID)target).getName().getString() : "目标玩家";
+                        actionbar = "{\"text\":\"§b你的目标: §d" + name + "\"}";
+                    } else {
+                        String entityName = getEntityName((EntityType<?>)target);
+                        actionbar = "{\"text\":\"§b你的目标: §c" + entityName + "\"}";
+                    }
+                    server.getCommandManager().executeWithPrefix(
+                        player.getCommandSource(),
+                        "title @s actionbar " + actionbar
+                    );
+                }
+            }
+        }
     }
     
     /**
