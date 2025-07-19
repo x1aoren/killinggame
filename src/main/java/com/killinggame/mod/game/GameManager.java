@@ -33,6 +33,8 @@ public class GameManager {
     private Map<UUID, Object> targetMap = new HashMap<>(); // 存储目标（EntityType或玩家UUID）
     private Map<UUID, Boolean> playerCompletedRound = new HashMap<>();
     private Map<UUID, Boolean> isPlayerTarget = new HashMap<>(); // 标记目标是否为玩家
+    private Set<EntityType<?>> usedEntityTargets = new HashSet<>(); // 跟踪已使用的实体目标
+    private Set<UUID> usedPlayerTargets = new HashSet<>(); // 跟踪已使用的玩家目标
     
     // 可能的目标实体列表
     private final List<EntityType<?>> possibleTargets = Arrays.asList(
@@ -90,6 +92,8 @@ public class GameManager {
         targetMap.clear();
         playerCompletedRound.clear();
         isPlayerTarget.clear();
+        usedEntityTargets.clear();
+        usedPlayerTargets.clear();
         
         // 创建计分板
         Scoreboard scoreboard = server.getScoreboard();
@@ -200,6 +204,10 @@ public class GameManager {
                 playerCompletedRound.put(player.getUuid(), false);
             }
         }
+        
+        // 重置已使用目标列表，允许下一轮重新使用所有目标
+        usedEntityTargets.clear();
+        usedPlayerTargets.clear();
         
         // 检查是否有玩家完成全部8轮
         checkForWinner(server);
@@ -356,9 +364,9 @@ public class GameManager {
         // 决定目标是实体还是玩家 (30%几率是玩家)
         boolean isPlayerTargetType = ThreadLocalRandom.current().nextDouble() < PLAYER_TARGET_CHANCE;
         
-        // 获取可能的玩家目标列表（排除自己）
+        // 获取可能的玩家目标列表（排除自己和已使用的玩家目标）
         List<ServerPlayerEntity> possiblePlayerTargets = server.getPlayerManager().getPlayerList().stream()
-                .filter(p -> !p.getUuid().equals(playerUUID))
+                .filter(p -> !p.getUuid().equals(playerUUID) && !usedPlayerTargets.contains(p.getUuid()))
                 .collect(Collectors.toList());
         
         // 如果没有其他玩家或随机决定目标是实体，则分配实体目标
@@ -381,6 +389,7 @@ public class GameManager {
             ServerPlayerEntity targetPlayer = possiblePlayerTargets.get(ThreadLocalRandom.current().nextInt(possiblePlayerTargets.size()));
             targetMap.put(playerUUID, targetPlayer.getUuid());
             isPlayerTarget.put(playerUUID, true);
+            usedPlayerTargets.add(targetPlayer.getUuid()); // 标记为已使用
             
             Text message = Text.literal(TextUtils.formatText("&e你的新目标是玩家: &d" + targetPlayer.getName().getString()));
             player.sendMessage(message, false);
@@ -397,7 +406,12 @@ public class GameManager {
      * 获取随机目标实体类型
      */
     private EntityType<?> getRandomTarget() {
-        return possibleTargets.get(ThreadLocalRandom.current().nextInt(possibleTargets.size()));
+        EntityType<?> target;
+        do {
+            target = possibleTargets.get(ThreadLocalRandom.current().nextInt(possibleTargets.size()));
+        } while (usedEntityTargets.contains(target));
+        usedEntityTargets.add(target);
+        return target;
     }
     
     /**
