@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
  * 游戏管理器，负责管理游戏状态和进程
  */
 public class GameManager {
-    // 游戏配置
-    private static final int MAX_ROUNDS = 8;
-    private static final int ROUND_TIME_MINUTES = 5;
-    private static final int ROUND_TIME_TICKS = ROUND_TIME_MINUTES * 60 * 20; // 5分钟（以游戏刻计）
+    // 游戏配置 - 改为实例变量以便动态修改
+    private int maxRounds = 8;
+    private int roundTimeMinutes = 5;
+    private int roundTimeTicks; // 自动计算
     
     // 游戏状态
     private boolean gameActive = false;
@@ -62,6 +62,14 @@ public class GameManager {
     
     // 击杀玩家的概率 (30%)
     private static final double PLAYER_TARGET_CHANCE = 0.3;
+    
+    /**
+     * 构造函数
+     */
+    public GameManager() {
+        // 初始化游戏刻数
+        this.roundTimeTicks = this.roundTimeMinutes * 60 * 20;
+    }
     
     /**
      * 开始游戏
@@ -114,7 +122,7 @@ public class GameManager {
         }
         
         broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
-        broadcastMessage("§e总共有 §c" + MAX_ROUNDS + " §e轮，每轮间隔 §c" + ROUND_TIME_MINUTES + " §e分钟。");
+        broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
         broadcastMessage("§b祝你好运！");
         broadcastMessage("§d提示：目标可能是生物，也可能是其他玩家！");
     }
@@ -155,7 +163,7 @@ public class GameManager {
         currentTick++;
         
         // 每5分钟检查一次轮次更新
-        if (currentTick % ROUND_TIME_TICKS == 0) {
+        if (currentTick % roundTimeTicks == 0) {
             updateRounds(server);
         }
     }
@@ -215,11 +223,11 @@ public class GameManager {
         scoreboard.getOrCreateScore(scoreHolder, objective).setScore(newRound);
         
         // 检查是否完成了所有轮数
-        if (newRound > MAX_ROUNDS) {
+        if (newRound > maxRounds) {
             // 已完成所有轮数，宣布胜利
             announceWinner(server, playerName);
             return;
-        } else if (newRound == MAX_ROUNDS) {
+        } else if (newRound == maxRounds) {
             // 进入最后一轮
             Text roundMessage = Text.literal(TextUtils.formatText("&a你已进入最后一轮！"));
             player.sendMessage(roundMessage, false);
@@ -248,7 +256,7 @@ public class GameManager {
             ScoreHolder scoreHolder = ScoreHolder.fromName(playerName);
             int currentRound = scoreboard.getOrCreateScore(scoreHolder, objective).getScore();
             
-            if (currentRound > MAX_ROUNDS) {
+            if (currentRound > maxRounds) {
                 // 宣布获胜者
                 announceWinner(server, playerName);
                 break;
@@ -261,7 +269,7 @@ public class GameManager {
      */
     private void announceWinner(MinecraftServer server, String playerName) {
         // 宣布获胜者
-        String winnerMessage = "§6§l恭喜玩家 §e" + playerName + " §6§l完成全部 " + MAX_ROUNDS + " 轮挑战，获得胜利！";
+        String winnerMessage = "§6§l恭喜玩家 §e" + playerName + " §6§l完成全部 " + maxRounds + " 轮挑战，获得胜利！";
         
         // 在聊天栏广播
         broadcastMessage(winnerMessage);
@@ -418,6 +426,43 @@ public class GameManager {
         return gameActive;
     }
     
+    /**
+     * 获取最大轮数
+     */
+    public int getMaxRounds() {
+        return maxRounds;
+    }
+
+    /**
+     * 设置最大轮数
+     */
+    public void setMaxRounds(int maxRounds) {
+        this.maxRounds = maxRounds;
+        this.roundTimeTicks = this.roundTimeMinutes * 60 * 20; // 重新计算游戏刻
+    }
+
+    /**
+     * 获取每轮时间（分钟）
+     */
+    public int getRoundTimeMinutes() {
+        return roundTimeMinutes;
+    }
+
+    /**
+     * 设置每轮时间（分钟）
+     */
+    public void setRoundTimeMinutes(int roundTimeMinutes) {
+        this.roundTimeMinutes = roundTimeMinutes;
+        this.roundTimeTicks = this.roundTimeMinutes * 60 * 20; // 重新计算游戏刻
+    }
+
+    /**
+     * 获取每轮时间（游戏刻）
+     */
+    public int getRoundTimeTicks() {
+        return roundTimeTicks;
+    }
+
     /**
      * 检查玩家的目标是否为其他玩家
      */
