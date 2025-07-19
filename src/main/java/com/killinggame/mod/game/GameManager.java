@@ -113,6 +113,11 @@ public class GameManager {
             "team modify " + teamName + " color green"
         );
         
+        // 加入队伍前关闭反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback false"
+        );
         // 设置所有玩家的初始轮数为1，并加入绿色队伍
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             ScoreHolder scoreHolder = ScoreHolder.fromName(player.getName().getString());
@@ -125,6 +130,11 @@ public class GameManager {
                 "team join " + teamName + " " + player.getName().getString()
             );
         }
+        // 加入队伍后恢复反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback true"
+        );
         
         broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
         broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
@@ -149,6 +159,11 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         
+        // 退出队伍前关闭反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback false"
+        );
         // 所有玩家退出队伍分组
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             server.getCommandManager().executeWithPrefix(
@@ -156,6 +171,11 @@ public class GameManager {
                 "team leave " + player.getName().getString()
             );
         }
+        // 退出队伍后恢复反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback true"
+        );
         
         broadcastMessage("§6§l生物大逃杀 §c已停止！");
     }
