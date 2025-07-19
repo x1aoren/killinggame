@@ -153,24 +153,15 @@ public class GameManager {
             return;
         }
         
-        // 重置所有玩家的本轮完成状态
+        // 处理未完成目标的玩家
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             if (!playerCompletedRound.getOrDefault(player.getUuid(), false)) {
                 broadcastMessage("§e玩家 §f" + player.getName().getString() + " §c未能在规定时间内完成目标！");
-            } else {
-                // 已完成目标的玩家增加轮数
-                String playerName = player.getName().getString();
-                ScoreHolder scoreHolder = ScoreHolder.fromName(playerName);
-                int currentRound = scoreboard.getOrCreateScore(scoreHolder, objective).getScore();
-                if (currentRound < MAX_ROUNDS) {
-                    scoreboard.getOrCreateScore(scoreHolder, objective).setScore(currentRound + 1);
-                    broadcastMessage("§e玩家 §f" + playerName + " §a进入第 §6" + (currentRound + 1) + " §a轮！");
-                }
+                
+                // 为每位未完成目标的玩家分配新的目标
+                assignNewTarget(player);
+                playerCompletedRound.put(player.getUuid(), false);
             }
-            
-            // 为每位玩家分配新的目标
-            assignNewTarget(player);
-            playerCompletedRound.put(player.getUuid(), false);
         }
         
         // 检查是否有玩家完成全部8轮
@@ -285,9 +276,16 @@ public class GameManager {
         Text message = Text.literal(TextUtils.formatText("&a恭喜！你成功击杀了目标: &e" + targetName));
         player.sendMessage(message, false);
         
-        // 如果是最后一轮，直接增加分数并检查获胜
+        // 直接增加轮数，不等待轮次更新
+        if (currentRound < MAX_ROUNDS) {
+            int newRound = currentRound + 1;
+            scoreboard.getOrCreateScore(scoreHolder, objective).setScore(newRound);
+            Text roundMessage = Text.literal(TextUtils.formatText("&a你已进入第 &6" + newRound + " &a轮！"));
+            player.sendMessage(roundMessage, false);
+        }
+        
+        // 如果是最后一轮，检查获胜
         if (currentRound >= MAX_ROUNDS) {
-            scoreboard.getOrCreateScore(scoreHolder, objective).setScore(currentRound + 1);
             checkForWinner(server);
             return;
         }
@@ -344,7 +342,8 @@ public class GameManager {
      * 获取实体类型的显示名称
      */
     private String getEntityName(EntityType<?> entityType) {
-        return Registries.ENTITY_TYPE.getId(entityType).getPath();
+        // 获取实体的翻译名称而不是路径名，这样可以显示中文
+        return entityType.getName().getString();
     }
     
     /**
