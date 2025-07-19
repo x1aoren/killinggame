@@ -205,8 +205,9 @@ public class GameManager {
                 
                 for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
                     serverPlayer.sendMessage(Text.literal(winnerMessage));
-                    // 使用1.21.6的标题API
-                    serverPlayer.sendTitleOnce(title, subtitle, 10, 70, 20);
+                    // 使用1.21.6的标题API - 分别设置标题和副标题
+                    serverPlayer.sendTitle(title, 10, 70, 20);
+                    serverPlayer.sendSubtitle(subtitle);
                 }
                 
                 // 停止游戏
