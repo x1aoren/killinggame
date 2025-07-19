@@ -154,6 +154,14 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         
+        // 所有玩家退出队伍分组
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            server.getCommandManager().executeWithPrefix(
+                server.getCommandSource(),
+                "team leave " + player.getName().getString()
+            );
+        }
+        
         // 恢复命令方块输出
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
