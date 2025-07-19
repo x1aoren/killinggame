@@ -17,9 +17,6 @@ import net.minecraft.util.Formatting;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
-import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
-import net.minecraft.network.packet.s2c.play.TitleAnimationS2CPacket;
 
 /**
  * 游戏管理器，负责管理游戏状态和进程
@@ -203,15 +200,25 @@ public class GameManager {
                 broadcastMessage(winnerMessage);
                 
                 // 使用title展示
-                Text title = Text.literal(TextUtils.formatText("&6&l游戏结束"));
-                Text subtitle = Text.literal(TextUtils.formatText("&e" + playerName + " &a获得胜利！"));
+                String titleText = TextUtils.formatText("&6&l游戏结束");
+                String subtitleText = TextUtils.formatText("&e" + playerName + " &a获得胜利！");
                 
                 for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
                     serverPlayer.sendMessage(Text.literal(winnerMessage));
-                    // 使用网络数据包发送标题
-                    serverPlayer.networkHandler.sendPacket(new TitleS2CPacket(title));
-                    serverPlayer.networkHandler.sendPacket(new SubtitleS2CPacket(subtitle));
-                    serverPlayer.networkHandler.sendPacket(new TitleAnimationS2CPacket(10, 70, 20));
+                    
+                    // 使用Minecraft命令显示标题
+                    server.getCommandManager().executeWithPrefix(
+                        serverPlayer.getCommandSource(),
+                        "title @s times 10 70 20"
+                    );
+                    server.getCommandManager().executeWithPrefix(
+                        serverPlayer.getCommandSource(),
+                        "title @s title {\"text\":\"" + titleText + "\"}"
+                    );
+                    server.getCommandManager().executeWithPrefix(
+                        serverPlayer.getCommandSource(),
+                        "title @s subtitle {\"text\":\"" + subtitleText + "\"}"
+                    );
                 }
                 
                 // 停止游戏
