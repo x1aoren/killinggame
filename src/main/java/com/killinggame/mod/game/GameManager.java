@@ -107,15 +107,15 @@ public class GameManager {
         scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, objective); // 显示在记分板侧边
         
         // 创建蓝色队伍
-        String teamName = "blue";
+        String teamName = "green";
         // 使用原版指令创建队伍
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
-            "team add " + teamName + " §9蓝队"
+            "team add " + teamName
         );
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
-            "team modify " + teamName + " color blue"
+            "team modify " + teamName + " color green"
         );
         
         // 设置所有玩家的初始轮数为1，并加入蓝色队伍
