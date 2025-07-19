@@ -12,6 +12,7 @@ import net.minecraft.scoreboard.ScoreHolder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 
 import java.util.*;
@@ -87,6 +88,12 @@ public class GameManager {
             "gamerule commandBlockOutput false"
         );
         
+        // 队伍操作前临时关闭反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback false"
+        );
+        
         gameActive = true;
         currentTick = 0;
         targetMap.clear();
@@ -106,7 +113,7 @@ public class GameManager {
             true, null);
         scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, objective); // 显示在记分板侧边
         
-        // 创建蓝色队伍
+        // 创建绿色队伍
         String teamName = "green";
         // 使用原版指令创建队伍
         server.getCommandManager().executeWithPrefix(
@@ -118,18 +125,23 @@ public class GameManager {
             "team modify " + teamName + " color green"
         );
         
-        // 设置所有玩家的初始轮数为1，并加入蓝色队伍
+        // 设置所有玩家的初始轮数为1，并加入绿色队伍
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             ScoreHolder scoreHolder = ScoreHolder.fromName(player.getName().getString());
             scoreboard.getOrCreateScore(scoreHolder, objective).setScore(1);
             assignNewTarget(player);
             playerCompletedRound.put(player.getUuid(), false);
-            // 使用原版指令加入蓝色队伍
+            // 使用原版指令加入绿色队伍
             server.getCommandManager().executeWithPrefix(
                 server.getCommandSource(),
                 "team join " + teamName + " " + player.getName().getString()
             );
         }
+        // 队伍操作后恢复反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback true"
+        );
         
         broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
         broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
@@ -154,6 +166,11 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         
+        // 队伍操作前临时关闭反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback false"
+        );
         // 所有玩家退出队伍分组
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             server.getCommandManager().executeWithPrefix(
@@ -161,6 +178,11 @@ public class GameManager {
                 "team leave " + player.getName().getString()
             );
         }
+        // 队伍操作后恢复反馈
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule sendCommandFeedback true"
+        );
         
         // 恢复命令方块输出
         server.getCommandManager().executeWithPrefix(
@@ -200,10 +222,20 @@ public class GameManager {
                     if (isPlayer) {
                         String name = server.getPlayerManager().getPlayer((UUID)target) != null ?
                             server.getPlayerManager().getPlayer((UUID)target).getName().getString() : "目标玩家";
-                        player.sendMessage(Text.literal("§b你的目标: §d" + name).styled(style -> style.withBold(true)), true);
+                        player.sendMessage(
+                            Text.literal("你的目标: ")
+                                .setStyle(Style.EMPTY.withColor(0x00BFFF).withBold(true))
+                                .append(Text.literal(name).setStyle(Style.EMPTY.withColor(0xAA00FF).withBold(true))),
+                            true
+                        );
                     } else {
                         String entityName = getEntityName((EntityType<?>)target);
-                        player.sendMessage(Text.literal("§b你的目标: §c" + entityName).styled(style -> style.withBold(true)), true);
+                        player.sendMessage(
+                            Text.literal("你的目标: ")
+                                .setStyle(Style.EMPTY.withColor(0x00BFFF).withBold(true))
+                                .append(Text.literal(entityName).setStyle(Style.EMPTY.withColor(0xFF5555).withBold(true))),
+                            true
+                        );
                     }
                 }
             }
@@ -405,7 +437,12 @@ public class GameManager {
             Text message = Text.literal(TextUtils.formatText("&e你的新目标是: &c" + entityName));
             player.sendMessage(message, false);
             // 动作栏显示
-            player.sendMessage(Text.literal("§b你的目标: §c" + entityName).styled(style -> style.withBold(true)), true);
+            player.sendMessage(
+                Text.literal("你的目标: ")
+                    .setStyle(Style.EMPTY.withColor(0x00BFFF).withBold(true))
+                    .append(Text.literal(entityName).setStyle(Style.EMPTY.withColor(0xFF5555).withBold(true))),
+                true
+            );
         } else {
             // 分配玩家目标
             ServerPlayerEntity targetPlayer = possiblePlayerTargets.get(ThreadLocalRandom.current().nextInt(possiblePlayerTargets.size()));
@@ -416,7 +453,12 @@ public class GameManager {
             Text message = Text.literal(TextUtils.formatText("&e你的新目标是玩家: &d" + targetPlayer.getName().getString()));
             player.sendMessage(message, false);
             // 动作栏显示
-            player.sendMessage(Text.literal("§b你的目标: §d" + targetPlayer.getName().getString()).styled(style -> style.withBold(true)), true);
+            player.sendMessage(
+                Text.literal("你的目标: ")
+                    .setStyle(Style.EMPTY.withColor(0x00BFFF).withBold(true))
+                    .append(Text.literal(targetPlayer.getName().getString()).setStyle(Style.EMPTY.withColor(0xAA00FF).withBold(true))),
+                true
+            );
         }
     }
     
