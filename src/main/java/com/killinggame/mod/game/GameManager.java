@@ -84,7 +84,7 @@ public class GameManager {
         // 关闭命令方块输出，减少聊天栏干扰
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
-            "gamerule commandBlockOutput false"
+            "gamerule sendCommandFeedback false"
         );
         
         gameActive = true;
@@ -157,7 +157,7 @@ public class GameManager {
         // 恢复命令方块输出
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
-            "gamerule commandBlockOutput true"
+            "gamerule sendCommandFeedback true"
         );
         
         broadcastMessage("§6§l生物大逃杀 §c已停止！");
