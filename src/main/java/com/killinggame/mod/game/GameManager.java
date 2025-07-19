@@ -88,12 +88,24 @@ public class GameManager {
             true, null);
         scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, objective); // 显示在记分板侧边
         
-        // 设置所有玩家的初始轮数为1
+        // 创建蓝色队伍
+        String teamName = "blue";
+        if (scoreboard.getTeam(teamName) == null) {
+            var team = scoreboard.addTeam(teamName);
+            team.setDisplayName(Text.literal("§9蓝队"));
+            team.setColor(Formatting.BLUE);
+        }
+        var blueTeam = scoreboard.getTeam(teamName);
+        // 设置所有玩家的初始轮数为1，并加入蓝色队伍
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             ScoreHolder scoreHolder = ScoreHolder.fromName(player.getName().getString());
             scoreboard.getOrCreateScore(scoreHolder, objective).setScore(1);
             assignNewTarget(player);
             playerCompletedRound.put(player.getUuid(), false);
+            // 加入蓝色队伍
+            if (blueTeam != null) {
+                scoreboard.addPlayerToTeam(player.getName().getString(), blueTeam);
+            }
         }
         
         broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
