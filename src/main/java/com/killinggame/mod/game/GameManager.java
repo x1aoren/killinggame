@@ -84,7 +84,7 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         objective = scoreboard.addObjective("轮数", ScoreboardCriterion.DUMMY, 
-            Text.literal("§6§l生物大逃杀 §f- §e轮数"), ScoreboardCriterion.RenderType.INTEGER, 
+            Text.literal("§6§l生物大逃杀 §9- §e轮数"), ScoreboardCriterion.RenderType.INTEGER, 
             true, null);
         scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, objective); // 显示在记分板侧边
         
