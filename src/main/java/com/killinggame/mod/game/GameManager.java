@@ -169,6 +169,54 @@ public class GameManager {
     }
     
     /**
+     * 完成一轮
+     */
+    private void completeRound(ServerPlayerEntity player, String targetName) {
+        MinecraftServer server = getServer();
+        if (server == null) return;
+        
+        Scoreboard scoreboard = server.getScoreboard();
+        ScoreboardObjective objective = scoreboard.getNullableObjective("轮数");
+        if (objective == null) return;
+        
+        UUID playerUUID = player.getUuid();
+        String playerName = player.getName().getString();
+        
+        // 标记玩家已完成本轮
+        playerCompletedRound.put(playerUUID, true);
+        
+        // 获取当前轮数
+        ScoreHolder scoreHolder = ScoreHolder.fromName(playerName);
+        int currentRound = scoreboard.getOrCreateScore(scoreHolder, objective).getScore();
+        
+        // 提示玩家已完成目标
+        Text message = Text.literal(TextUtils.formatText("&a恭喜！你成功击杀了目标: &e" + targetName));
+        player.sendMessage(message, false);
+        
+        // 增加轮数并检查是否达到最大轮数
+        int newRound = currentRound + 1;
+        scoreboard.getOrCreateScore(scoreHolder, objective).setScore(newRound);
+        
+        // 检查是否完成了所有轮数
+        if (newRound > MAX_ROUNDS) {
+            // 已完成所有轮数，宣布胜利
+            announceWinner(server, playerName);
+            return;
+        } else if (newRound == MAX_ROUNDS) {
+            // 进入最后一轮
+            Text roundMessage = Text.literal(TextUtils.formatText("&a你已进入最后一轮！"));
+            player.sendMessage(roundMessage, false);
+        } else {
+            // 普通进入下一轮
+            Text roundMessage = Text.literal(TextUtils.formatText("&a你已进入第 &6" + newRound + " &a轮！"));
+            player.sendMessage(roundMessage, false);
+        }
+        
+        // 分配新的目标
+        assignNewTarget(player);
+    }
+    
+    /**
      * 检查获胜者
      */
     private void checkForWinner(MinecraftServer server) {
@@ -185,38 +233,46 @@ public class GameManager {
             
             if (currentRound > MAX_ROUNDS) {
                 // 宣布获胜者
-                String winnerMessage = "§6§l恭喜玩家 §e" + playerName + " §6§l完成全部 " + MAX_ROUNDS + " 轮挑战，获得胜利！";
-                
-                // 在聊天栏广播
-                broadcastMessage(winnerMessage);
-                
-                // 使用title展示
-                String titleText = TextUtils.formatText("&6&l游戏结束");
-                String subtitleText = TextUtils.formatText("&e" + playerName + " &a获得胜利！");
-                
-                for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
-                    serverPlayer.sendMessage(Text.literal(winnerMessage));
-                    
-                    // 使用Minecraft命令显示标题
-                    server.getCommandManager().executeWithPrefix(
-                        serverPlayer.getCommandSource(),
-                        "title @s times 10 70 20"
-                    );
-                    server.getCommandManager().executeWithPrefix(
-                        serverPlayer.getCommandSource(),
-                        "title @s title {\"text\":\"" + titleText + "\"}"
-                    );
-                    server.getCommandManager().executeWithPrefix(
-                        serverPlayer.getCommandSource(),
-                        "title @s subtitle {\"text\":\"" + subtitleText + "\"}"
-                    );
-                }
-                
-                // 停止游戏
-                stopGame(server);
+                announceWinner(server, playerName);
                 break;
             }
         }
+    }
+    
+    /**
+     * 宣布获胜者
+     */
+    private void announceWinner(MinecraftServer server, String playerName) {
+        // 宣布获胜者
+        String winnerMessage = "§6§l恭喜玩家 §e" + playerName + " §6§l完成全部 " + MAX_ROUNDS + " 轮挑战，获得胜利！";
+        
+        // 在聊天栏广播
+        broadcastMessage(winnerMessage);
+        
+        // 使用title展示
+        String titleText = TextUtils.formatText("&6&l游戏结束");
+        String subtitleText = TextUtils.formatText("&e" + playerName + " &a获得胜利！");
+        
+        for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
+            serverPlayer.sendMessage(Text.literal(winnerMessage));
+            
+            // 使用Minecraft命令显示标题
+            server.getCommandManager().executeWithPrefix(
+                serverPlayer.getCommandSource(),
+                "title @s times 10 70 20"
+            );
+            server.getCommandManager().executeWithPrefix(
+                serverPlayer.getCommandSource(),
+                "title @s title {\"text\":\"" + titleText + "\"}"
+            );
+            server.getCommandManager().executeWithPrefix(
+                serverPlayer.getCommandSource(),
+                "title @s subtitle {\"text\":\"" + subtitleText + "\"}"
+            );
+        }
+        
+        // 停止游戏
+        stopGame(server);
     }
     
     /**
@@ -249,49 +305,6 @@ public class GameManager {
             String victimName = victim.getName().getString();
             completeRound(killer, victimName);
         }
-    }
-    
-    /**
-     * 完成一轮
-     */
-    private void completeRound(ServerPlayerEntity player, String targetName) {
-        MinecraftServer server = getServer();
-        if (server == null) return;
-        
-        Scoreboard scoreboard = server.getScoreboard();
-        ScoreboardObjective objective = scoreboard.getNullableObjective("轮数");
-        if (objective == null) return;
-        
-        UUID playerUUID = player.getUuid();
-        String playerName = player.getName().getString();
-        
-        // 标记玩家已完成本轮
-        playerCompletedRound.put(playerUUID, true);
-        
-        // 获取当前轮数
-        ScoreHolder scoreHolder = ScoreHolder.fromName(playerName);
-        int currentRound = scoreboard.getOrCreateScore(scoreHolder, objective).getScore();
-        
-        // 提示玩家已完成目标
-        Text message = Text.literal(TextUtils.formatText("&a恭喜！你成功击杀了目标: &e" + targetName));
-        player.sendMessage(message, false);
-        
-        // 直接增加轮数，不等待轮次更新
-        if (currentRound < MAX_ROUNDS) {
-            int newRound = currentRound + 1;
-            scoreboard.getOrCreateScore(scoreHolder, objective).setScore(newRound);
-            Text roundMessage = Text.literal(TextUtils.formatText("&a你已进入第 &6" + newRound + " &a轮！"));
-            player.sendMessage(roundMessage, false);
-        }
-        
-        // 如果是最后一轮，检查获胜
-        if (currentRound >= MAX_ROUNDS) {
-            checkForWinner(server);
-            return;
-        }
-        
-        // 分配新的目标
-        assignNewTarget(player);
     }
     
     /**
