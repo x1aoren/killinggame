@@ -19,7 +19,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import net.minecraft.network.packet.s2c.play.SubtitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
-import net.minecraft.network.packet.s2c.play.TitleAnimationTimesS2CPacket;
+import net.minecraft.network.packet.s2c.play.TitleAnimationS2CPacket;
 
 /**
  * 游戏管理器，负责管理游戏状态和进程
@@ -211,7 +211,7 @@ public class GameManager {
                     // 使用网络数据包发送标题
                     serverPlayer.networkHandler.sendPacket(new TitleS2CPacket(title));
                     serverPlayer.networkHandler.sendPacket(new SubtitleS2CPacket(subtitle));
-                    serverPlayer.networkHandler.sendPacket(new TitleAnimationTimesS2CPacket(10, 70, 20));
+                    serverPlayer.networkHandler.sendPacket(new TitleAnimationS2CPacket(10, 70, 20));
                 }
                 
                 // 停止游戏
