@@ -79,6 +79,12 @@ public class GameManager {
             return;
         }
         
+        // 关闭命令方块输出，减少聊天栏干扰
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule commandBlockOutput false"
+        );
+        
         gameActive = true;
         currentTick = 0;
         targetMap.clear();
@@ -143,6 +149,12 @@ public class GameManager {
         if (objective != null) {
             scoreboard.removeObjective(objective);
         }
+        
+        // 恢复命令方块输出
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "gamerule commandBlockOutput true"
+        );
         
         broadcastMessage("§6§l生物大逃杀 §c已停止！");
     }
