@@ -82,18 +82,6 @@ public class GameManager {
             return;
         }
         
-        // 关闭命令方块输出，减少聊天栏干扰
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule commandBlockOutput false"
-        );
-        
-        // 队伍操作前临时关闭反馈
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule sendCommandFeedback false"
-        );
-        
         gameActive = true;
         currentTick = 0;
         targetMap.clear();
@@ -137,11 +125,6 @@ public class GameManager {
                 "team join " + teamName + " " + player.getName().getString()
             );
         }
-        // 队伍操作后恢复反馈
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule sendCommandFeedback true"
-        );
         
         broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
         broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
@@ -166,11 +149,6 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         
-        // 队伍操作前临时关闭反馈
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule sendCommandFeedback false"
-        );
         // 所有玩家退出队伍分组
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             server.getCommandManager().executeWithPrefix(
@@ -178,17 +156,6 @@ public class GameManager {
                 "team leave " + player.getName().getString()
             );
         }
-        // 队伍操作后恢复反馈
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule sendCommandFeedback true"
-        );
-        
-        // 恢复命令方块输出
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule commandBlockOutput true"
-        );
         
         broadcastMessage("§6§l生物大逃杀 §c已停止！");
     }
