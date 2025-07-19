@@ -87,14 +87,21 @@ public class KillingGameCommand {
     private static int showHelp(CommandContext<ServerCommandSource> context) {
         ServerCommandSource source = context.getSource();
         
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6===== &e生物大逃杀指令帮助 &6=====")), false);
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame start &7- &f开始游戏")), false);
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame stop &7- &f停止游戏")), false);
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame status &7- &f查看游戏状态")), false);
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame set rounds <数量> &7- &f设置总轮数(1-50)")), false);
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame set time <分钟> &7- &f设置每轮时间(1-60分钟)")), false);
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame help &7- &f显示此帮助")), false);
-        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6========================")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6&l===== &e生物大逃杀指令帮助 &6&l=====")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&a&l游戏控制指令：")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame start &7- &f开始生物大逃杀游戏")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame stop &7- &f停止当前游戏")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame status &7- &f查看当前游戏状态")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&b&l游戏配置指令：")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame set rounds <数量> &7- &f设置游戏总轮数 &8(&7范围: 1-50&8)")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame set time <分钟> &7- &f设置每轮时间间隔 &8(&7范围: 1-60分钟&8)")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&d&l其他指令：")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&e/killinggame help &7- &f显示此帮助菜单")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("")), false);
+        source.sendFeedback(() -> Text.literal(TextUtils.formatText("&6&l================================")), false);
         
         return 1;
     }
