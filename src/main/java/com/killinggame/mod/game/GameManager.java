@@ -193,10 +193,10 @@ public class GameManager {
                     if (isPlayer) {
                         String name = server.getPlayerManager().getPlayer((UUID)target) != null ?
                             server.getPlayerManager().getPlayer((UUID)target).getName().getString() : "目标玩家";
-                        actionbar = "{\"text\":\"§b你的目标: §d" + name + "\"}";
+                        actionbar = "{\"text\":\"§b你的目标: §d" + name + "\",\"bold\":true}";
                     } else {
                         String entityName = getEntityName((EntityType<?>)target);
-                        actionbar = "{\"text\":\"§b你的目标: §c" + entityName + "\"}";
+                        actionbar = "{\"text\":\"§b你的目标: §c" + entityName + "\",\"bold\":true}";
                     }
                     server.getCommandManager().executeWithPrefix(
                         player.getCommandSource(),
