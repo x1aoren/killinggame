@@ -14,6 +14,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
+import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -345,12 +346,8 @@ public class GameManager {
         
         for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
             serverPlayer.sendMessage(Text.literal(winnerMessage));
-            // 使用ServerPlayerEntity的sendTitle方法发送标题和副标题
-            serverPlayer.sendTitle(
-                Text.literal(titleText),      // 主标题
-                Text.literal(subtitleText),   // 副标题
-                10, 70, 20                    // 渐入、持续、渐出时间（tick）
-            );
+            // 使用自定义 sendTitle 方法发送标题和副标题
+            sendTitle(serverPlayer, titleText, subtitleText, 10, 70, 20);
         }
         
         // 停止游戏
@@ -540,5 +537,21 @@ public class GameManager {
      */
     public Object getPlayerTarget(UUID playerUUID) {
         return targetMap.get(playerUUID);
+    }
+
+    // 发送标题和副标题（适配 1.21+）
+    public static void sendTitle(ServerPlayerEntity player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        // 主标题
+        player.networkHandler.sendPacket(
+            new TitleS2CPacket(TitleS2CPacket.Action.TITLE, Text.literal(title))
+        );
+        // 副标题
+        player.networkHandler.sendPacket(
+            new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, Text.literal(subtitle))
+        );
+        // 设置显示时间
+        player.networkHandler.sendPacket(
+            new TitleS2CPacket(fadeIn, stay, fadeOut)
+        );
     }
 } 
