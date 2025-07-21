@@ -15,6 +15,8 @@ import net.minecraft.text.Text;
 import net.minecraft.text.Style;
 import net.minecraft.util.Formatting;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
+import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket;
+import net.minecraft.sound.SoundEvents;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -141,6 +143,14 @@ public class GameManager {
         broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
         broadcastMessage("§b祝你好运！");
         broadcastMessage("§d提示：目标可能是生物，也可能是其他玩家！");
+        // 开启游戏时播放经验球音效
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            player.playSound(
+                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
+                1.0F,
+                1.0F
+            );
+        }
     }
     
     /**
@@ -349,6 +359,14 @@ public class GameManager {
             // 使用自定义 sendTitle 方法发送标题和副标题
             sendTitle(serverPlayer, titleText, subtitleText, 10, 70, 20);
         }
+        // 胜利时播放成就完成音效
+        for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
+            serverPlayer.playSound(
+                SoundEvents.UI_TOAST_CHALLENGE_COMPLETE,
+                1.0F,
+                1.0F
+            );
+        }
         
         // 停止游戏
         stopGame(server);
@@ -501,6 +519,17 @@ public class GameManager {
     public void setMaxRounds(int maxRounds) {
         this.maxRounds = maxRounds;
         this.roundTimeTicks = this.roundTimeMinutes * 60 * 20; // 重新计算游戏刻
+        // 设置轮数时播放音符盒音效
+        MinecraftServer server = getServer();
+        if (server != null) {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                player.playSound(
+                    SoundEvents.BLOCK_NOTE_BLOCK_PLING,
+                    1.0F,
+                    1.0F
+                );
+            }
+        }
     }
 
     /**
@@ -516,6 +545,17 @@ public class GameManager {
     public void setRoundTimeMinutes(int roundTimeMinutes) {
         this.roundTimeMinutes = roundTimeMinutes;
         this.roundTimeTicks = this.roundTimeMinutes * 60 * 20; // 重新计算游戏刻
+        // 设置分钟时播放音符盒音效
+        MinecraftServer server = getServer();
+        if (server != null) {
+            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                player.playSound(
+                    SoundEvents.BLOCK_NOTE_BLOCK_PLING,
+                    1.0F,
+                    1.0F
+                );
+            }
+        }
     }
 
     /**
@@ -541,17 +581,11 @@ public class GameManager {
 
     // 发送标题和副标题（适配 1.21+）
     public static void sendTitle(ServerPlayerEntity player, String title, String subtitle, int fadeIn, int stay, int fadeOut) {
+        // 先设置显示时间
+        player.networkHandler.sendPacket(new TitleFadeS2CPacket(fadeIn, stay, fadeOut));
         // 主标题
-        player.networkHandler.sendPacket(
-            new TitleS2CPacket(TitleS2CPacket.Action.TITLE, Text.literal(title))
-        );
+        player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(title)));
         // 副标题
-        player.networkHandler.sendPacket(
-            new TitleS2CPacket(TitleS2CPacket.Action.SUBTITLE, Text.literal(subtitle))
-        );
-        // 设置显示时间
-        player.networkHandler.sendPacket(
-            new TitleS2CPacket(fadeIn, stay, fadeOut)
-        );
+        player.networkHandler.sendPacket(new TitleS2CPacket(Text.literal(subtitle)));
     }
 } 
