@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 public class GameManager {
     // 游戏配置 - 改为实例变量以便动态修改
     private int maxRounds = 8;
-    private int roundTimeMinutes = 5;
+    private int roundTimeMinutes = 3;
     private int roundTimeTicks; // 自动计算
     
     // 游戏状态
