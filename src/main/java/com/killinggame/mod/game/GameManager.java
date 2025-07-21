@@ -345,19 +345,11 @@ public class GameManager {
         
         for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
             serverPlayer.sendMessage(Text.literal(winnerMessage));
-            
-            // 使用Minecraft命令显示标题
-            server.getCommandManager().executeWithPrefix(
-                serverPlayer.getCommandSource(),
-                "title @s times 10 70 20"
-            );
-            server.getCommandManager().executeWithPrefix(
-                serverPlayer.getCommandSource(),
-                "title @s title {\"text\":\"" + titleText + "\"}"
-            );
-            server.getCommandManager().executeWithPrefix(
-                serverPlayer.getCommandSource(),
-                "title @s subtitle {\"text\":\"" + subtitleText + "\"}"
+            // 使用ServerPlayerEntity的sendTitle方法发送标题和副标题
+            serverPlayer.sendTitle(
+                Text.literal(titleText),      // 主标题
+                Text.literal(subtitleText),   // 副标题
+                10, 70, 20                    // 渐入、持续、渐出时间（tick）
             );
         }
         
