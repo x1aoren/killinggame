@@ -134,10 +134,6 @@ public class GameManager {
             );
         }
         // 加入队伍后恢复反馈
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule sendCommandFeedback true"
-        );
         
         broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
         broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
@@ -183,10 +179,6 @@ public class GameManager {
             );
         }
         // 退出队伍后恢复反馈
-        server.getCommandManager().executeWithPrefix(
-            server.getCommandSource(),
-            "gamerule sendCommandFeedback true"
-        );
         
         broadcastMessage("§6§l生物大逃杀 §c已停止！");
     }
