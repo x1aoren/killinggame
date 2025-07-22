@@ -141,8 +141,11 @@ public class GameManager {
         broadcastMessage("§d提示：目标可能是生物，也可能是其他玩家！");
         // 开启游戏时播放经验球音效
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-            player.playSound(
+            player.getWorld().playSound(
+                null,
+                player.getBlockPos(),
                 SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
+                net.minecraft.sound.SoundCategory.PLAYERS,
                 1.0F,
                 1.0F
             );
@@ -353,8 +356,11 @@ public class GameManager {
         }
         // 胜利时播放成就完成音效
         for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
-            serverPlayer.playSound(
+            serverPlayer.getWorld().playSound(
+                null,
+                serverPlayer.getBlockPos(),
                 SoundEvents.ENTITY_PLAYER_LEVELUP,
+                net.minecraft.sound.SoundCategory.PLAYERS,
                 1.0F,
                 1.0F
             );
@@ -515,8 +521,11 @@ public class GameManager {
         MinecraftServer server = getServer();
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                player.playSound(
+                player.getWorld().playSound(
+                    null,
+                    player.getBlockPos(),
                     SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
+                    net.minecraft.sound.SoundCategory.PLAYERS,
                     1.0F,
                     1.0F
                 );
@@ -541,8 +550,11 @@ public class GameManager {
         MinecraftServer server = getServer();
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
-                player.playSound(
+                player.getWorld().playSound(
+                    null,
+                    player.getBlockPos(),
                     SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
+                    net.minecraft.sound.SoundCategory.PLAYERS,
                     1.0F,
                     1.0F
                 );
