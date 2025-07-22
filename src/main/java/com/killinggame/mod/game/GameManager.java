@@ -146,7 +146,7 @@ public class GameManager {
         // 开启游戏时播放经验球音效
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.playSound(
-                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP.get(),
+                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
                 1.0F,
                 1.0F
             );
@@ -362,7 +362,7 @@ public class GameManager {
         // 胜利时播放成就完成音效
         for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
             serverPlayer.playSound(
-                SoundEvents.UI_TOAST_CHALLENGE_COMPLETE.get(),
+                SoundEvents.ENTITY_PLAYER_LEVELUP,
                 1.0F,
                 1.0F
             );
@@ -524,7 +524,7 @@ public class GameManager {
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 player.playSound(
-                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.get(),
+                    SoundEvents.BLOCK_NOTE_BLOCK_PLING,
                     1.0F,
                     1.0F
                 );
@@ -550,7 +550,7 @@ public class GameManager {
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 player.playSound(
-                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.get(),
+                    SoundEvents.BLOCK_NOTE_BLOCK_PLING,
                     1.0F,
                     1.0F
                 );
