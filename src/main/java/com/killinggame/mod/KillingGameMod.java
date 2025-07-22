@@ -8,8 +8,6 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.server.MinecraftServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.api.EnvType;
 
 /**
  * 生物大逃杀主模组类
@@ -36,11 +34,6 @@ public class KillingGameMod implements ModInitializer {
             
             // 注册事件
             KillingGameEvents.registerEvents();
-            
-            // 客户端注册同步接收器
-            if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) {
-                com.killinggame.mod.game.GameSettingsSyncHelper.registerClientReceiver();
-            }
             
             LOGGER.info("生物大逃杀模组已加载完成");
         } catch (Exception e) {

@@ -517,6 +517,7 @@ public class GameManager {
     public void setMaxRounds(int maxRounds) {
         this.maxRounds = maxRounds;
         this.roundTimeTicks = this.roundTimeMinutes * 60 * 20; // 重新计算游戏刻
+        // 设置轮数时播放音符盒音效
         MinecraftServer server = getServer();
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
@@ -529,8 +530,6 @@ public class GameManager {
                     1.0F
                 );
             }
-            // 同步设置到所有客户端
-            com.killinggame.mod.game.GameSettingsSyncHelper.syncGameSettingsToAll(server, this.maxRounds, this.roundTimeMinutes);
         }
     }
 
@@ -547,6 +546,7 @@ public class GameManager {
     public void setRoundTimeMinutes(int roundTimeMinutes) {
         this.roundTimeMinutes = roundTimeMinutes;
         this.roundTimeTicks = this.roundTimeMinutes * 60 * 20; // 重新计算游戏刻
+        // 设置分钟时播放音符盒音效
         MinecraftServer server = getServer();
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
@@ -559,8 +559,6 @@ public class GameManager {
                     1.0F
                 );
             }
-            // 同步设置到所有客户端
-            com.killinggame.mod.game.GameSettingsSyncHelper.syncGameSettingsToAll(server, this.maxRounds, this.roundTimeMinutes);
         }
     }
 
