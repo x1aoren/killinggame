@@ -524,7 +524,7 @@ public class GameManager {
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 player.playSound(
-                    SoundEvents.BLOCK_NOTE_BLOCK_PLING,
+                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
                     1.0F,
                     1.0F
                 );
@@ -550,7 +550,7 @@ public class GameManager {
         if (server != null) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
                 player.playSound(
-                    SoundEvents.BLOCK_NOTE_BLOCK_PLING,
+                    SoundEvents.BLOCK_NOTE_BLOCK_PLING.value(),
                     1.0F,
                     1.0F
                 );
