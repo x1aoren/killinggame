@@ -39,6 +39,7 @@ public class GameManager {
     private Map<UUID, Boolean> isPlayerTarget = new HashMap<>(); // 标记目标是否为玩家
     private Set<EntityType<?>> usedEntityTargets = new HashSet<>(); // 跟踪已使用的实体目标
     private Set<UUID> usedPlayerTargets = new HashSet<>(); // 跟踪已使用的玩家目标
+    private Map<UUID, Integer> playerLastAssignTick = new HashMap<>(); // 记录每个玩家上次分配目标的tick
     
     // 可能的目标实体列表
     private final List<EntityType<?>> possibleTargets = Arrays.asList(
@@ -92,6 +93,7 @@ public class GameManager {
         isPlayerTarget.clear();
         usedEntityTargets.clear();
         usedPlayerTargets.clear();
+        playerLastAssignTick.clear(); // 新增：重置所有玩家的计时
         
         // 创建计分板
         Scoreboard scoreboard = server.getScoreboard();
@@ -201,11 +203,18 @@ public class GameManager {
         
         currentTick++;
         
-        // 每5分钟检查一次轮次更新
-        if (currentTick % roundTimeTicks == 0) {
-            updateRounds(server);
+        // 每个玩家独立计时刷新目标
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            UUID uuid = player.getUuid();
+            int lastTick = playerLastAssignTick.getOrDefault(uuid, 0);
+            boolean completed = playerCompletedRound.getOrDefault(uuid, false);
+            if (!completed && currentTick - lastTick >= roundTimeTicks) {
+                assignNewTarget(player);
+                playerLastAssignTick.put(uuid, currentTick);
+                playerCompletedRound.put(uuid, false);
+                broadcastMessage("§e玩家 §f" + player.getName().getString() + " §c未能在规定时间内完成目标，已为其分配新目标！");
+            }
         }
-        
         // 每秒刷新一次动作栏目标提示
         if (currentTick % 20 == 0) {
             for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
@@ -308,8 +317,10 @@ public class GameManager {
             player.sendMessage(roundMessage, false);
         }
         
-        // 分配新的目标
+        // 分配新的目标，并重置个人计时
         assignNewTarget(player);
+        playerLastAssignTick.put(playerUUID, currentTick);
+        playerCompletedRound.put(playerUUID, false);
     }
     
     /**
