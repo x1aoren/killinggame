@@ -541,6 +541,7 @@ public class GameManager {
                     1.0F
                 );
             }
+            broadcastMessage("§a最大轮数已设置为: §e" + maxRounds);
         }
     }
 
@@ -570,6 +571,7 @@ public class GameManager {
                     1.0F
                 );
             }
+            broadcastMessage("§a每轮时间已设置为: §e" + roundTimeMinutes + " §a分钟");
         }
     }
 
