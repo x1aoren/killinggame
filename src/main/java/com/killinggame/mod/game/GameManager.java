@@ -151,7 +151,7 @@ public class GameManager {
             player.getWorld().playSound(
                 null,
                 player.getBlockPos(),
-                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
+                net.minecraft.sound.SoundEvent.of(new net.minecraft.util.Identifier("minecraft", "item.goat_horn.sound.0")),
                 net.minecraft.sound.SoundCategory.PLAYERS,
                 1.0F,
                 1.0F
