@@ -120,7 +120,7 @@ public class GameManager {
         // 设置队伍前缀为红色[玩家]
         server.getCommandManager().executeWithPrefix(
             server.getCommandSource(),
-            "team modify " + teamName + " prefix \"§c[玩家] §r\""
+            "team modify " + teamName + " prefix \"§4[玩家] §r\""
         );
         
         // 加入队伍前关闭反馈
@@ -231,16 +231,16 @@ public class GameManager {
                             server.getPlayerManager().getPlayer((UUID)target).getName().getString() : "目标玩家";
                         player.sendMessage(
                             Text.literal("你的目标: ")
-                                .setStyle(Style.EMPTY.withColor(0xFF0000).withBold(true))
-                                .append(Text.literal(name).setStyle(Style.EMPTY.withColor(0xAA00FF).withBold(true))),
+                                .setStyle(Style.EMPTY.withColor(0xFFFF00).withBold(true))
+                                .append(Text.literal(name).setStyle(Style.EMPTY.withColor(0xAA0000).withBold(true))),
                             true
                         );
                     } else {
                         String entityName = getEntityName((EntityType<?>)target);
                         player.sendMessage(
                             Text.literal("你的目标: ")
-                                .setStyle(Style.EMPTY.withColor(0xFF0000).withBold(true))
-                                .append(Text.literal(entityName).setStyle(Style.EMPTY.withColor(0xFF5555).withBold(true))),
+                                .setStyle(Style.EMPTY.withColor(0xFFFF00).withBold(true))
+                                .append(Text.literal(entityName).setStyle(Style.EMPTY.withColor(0xAA0000).withBold(true))),
                             true
                         );
                     }
@@ -448,8 +448,8 @@ public class GameManager {
             // 动作栏显示
             player.sendMessage(
                 Text.literal("你的目标: ")
-                    .setStyle(Style.EMPTY.withColor(0xFF0000).withBold(true))
-                    .append(Text.literal(entityName).setStyle(Style.EMPTY.withColor(0xFF5555).withBold(true))),
+                    .setStyle(Style.EMPTY.withColor(0xFFFF00).withBold(true))
+                    .append(Text.literal(entityName).setStyle(Style.EMPTY.withColor(0xAA0000).withBold(true))),
                 true
             );
         } else {
@@ -464,8 +464,8 @@ public class GameManager {
             // 动作栏显示
             player.sendMessage(
                 Text.literal("你的目标: ")
-                    .setStyle(Style.EMPTY.withColor(0xFF0000).withBold(true))
-                    .append(Text.literal(targetPlayer.getName().getString()).setStyle(Style.EMPTY.withColor(0xAA00FF).withBold(true))),
+                    .setStyle(Style.EMPTY.withColor(0xFFFF00).withBold(true))
+                    .append(Text.literal(targetPlayer.getName().getString()).setStyle(Style.EMPTY.withColor(0xAA0000).withBold(true))),
                 true
             );
         }
