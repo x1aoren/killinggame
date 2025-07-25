@@ -17,8 +17,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -148,12 +146,12 @@ public class GameManager {
         broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
         broadcastMessage("§b祝你好运！");
         broadcastMessage("§d提示：目标可能是生物，也可能是其他玩家！");
-        // 开启游戏时播放山羊角音效
+        // 开启游戏时播放经验球音效
         for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
             player.getWorld().playSound(
                 null,
                 player.getBlockPos(),
-                SoundEvent.of(new Identifier("minecraft", "item.goat_horn.sound.0")),
+                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
                 net.minecraft.sound.SoundCategory.PLAYERS,
                 1.0F,
                 1.0F
