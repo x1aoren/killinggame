@@ -541,6 +541,8 @@ public class GameManager {
                     1.0F,
                     1.0F
                 );
+            // 同步所有玩家的轮数
+            playerLastAssignTick.put(player.getUuid(), currentTick);
             }
             broadcastMessage("§a最大轮数已设置为: §e" + maxRounds);
         }
@@ -571,6 +573,8 @@ public class GameManager {
                     1.0F,
                     1.0F
                 );
+                // 同步所有玩家的计时
+            playerLastAssignTick.put(player.getUuid(), currentTick);
             }
             broadcastMessage("§a每轮时间已设置为: §e" + roundTimeMinutes + " §a分钟");
         }
