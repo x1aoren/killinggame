@@ -102,7 +102,7 @@ public class GameManager {
             scoreboard.removeObjective(objective);
         }
         objective = scoreboard.addObjective("轮数", ScoreboardCriterion.DUMMY, 
-            Text.literal("§6§l生物大逃杀 §9- §e轮数"), ScoreboardCriterion.RenderType.INTEGER, 
+            Text.literal("§6生物大逃杀 §9- §e轮数"), ScoreboardCriterion.RenderType.INTEGER, 
             true, null);
         scoreboard.setObjectiveSlot(ScoreboardDisplaySlot.SIDEBAR, objective); // 显示在记分板侧边
         
@@ -353,16 +353,17 @@ public class GameManager {
         // 宣布获胜者
         String winnerMessage = "§6§l恭喜玩家 §e" + playerName + " §6§l完成全部 " + maxRounds + " 轮挑战，获得胜利！";
         
-        // 在聊天栏广播
-        broadcastMessage(winnerMessage);
+        // 在聊天栏广播三遍
+        for (int i = 0; i < 3; i++) {
+            broadcastMessage(winnerMessage);
+        }
         
         // 使用title展示
         String titleText = TextUtils.formatText("&6&l游戏结束");
         String subtitleText = TextUtils.formatText("&e" + playerName + " &a获得胜利！");
         
         for (ServerPlayerEntity serverPlayer : server.getPlayerManager().getPlayerList()) {
-            serverPlayer.sendMessage(Text.literal(winnerMessage));
-            // 使用自定义 sendTitle 方法发送标题和副标题
+            // 只发送一次消息（不再每人一条）
             sendTitle(serverPlayer, titleText, subtitleText, 10, 70, 20);
         }
         // 胜利时播放成就完成音效
