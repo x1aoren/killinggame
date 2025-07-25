@@ -151,7 +151,7 @@ public class GameManager {
             player.getWorld().playSound(
                 null,
                 player.getBlockPos(),
-                net.minecraft.sound.SoundEvent.of(new net.minecraft.util.Identifier("minecraft", "item.goat_horn.sound.0")),
+                SoundEvents.ITEM_GOAT_HORN_SOUND_0,
                 net.minecraft.sound.SoundCategory.PLAYERS,
                 1.0F,
                 1.0F
