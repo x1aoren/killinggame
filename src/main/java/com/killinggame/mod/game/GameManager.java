@@ -117,6 +117,11 @@ public class GameManager {
             server.getCommandSource(),
             "team modify " + teamName + " color green"
         );
+        // 设置队伍前缀为红色[玩家]
+        server.getCommandManager().executeWithPrefix(
+            server.getCommandSource(),
+            "team modify " + teamName + " prefix \"§c[玩家] §r\""
+        );
         
         // 加入队伍前关闭反馈
         server.getCommandManager().executeWithPrefix(
