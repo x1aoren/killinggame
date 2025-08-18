@@ -70,6 +70,10 @@ public class GameManager {
     // 击杀玩家的概率 (30%)
     private static final double PLAYER_TARGET_CHANCE = 0.3;
     
+    // 延迟清理相关变量
+    private boolean delayedCleanupScheduled = false;
+    private int cleanupCountdown = 0;
+    
     /**
      * 构造函数
      */
@@ -94,6 +98,8 @@ public class GameManager {
         usedEntityTargets.clear();
         usedPlayerTargets.clear();
         playerLastAssignTick.clear(); // 新增：重置所有玩家的计时
+        delayedCleanupScheduled = false; // 重置延迟清理状态
+        cleanupCountdown = 0;
         
         // 创建计分板
         Scoreboard scoreboard = server.getScoreboard();
@@ -144,6 +150,7 @@ public class GameManager {
         
         broadcastMessage("§6§l生物大逃杀 §a已开始！每位玩家需要击杀特定目标来完成轮数。");
         broadcastMessage("§e总共有 §c" + maxRounds + " §e轮，每轮间隔 §c" + roundTimeMinutes + " §e分钟。");
+        broadcastMessage("§c§l重要提示：游戏过程中请不要退出游戏，否则可能出现BUG！");
         broadcastMessage("§b祝你好运！");
         broadcastMessage("§d提示：目标可能是生物，也可能是其他玩家！");
         // 开启游戏时播放经验球音效
@@ -190,19 +197,45 @@ public class GameManager {
         }
         // 退出队伍后恢复反馈
         
-        broadcastMessage("§6§l生物大逃杀 §c已停止！");
+        // 只有在非延迟清理模式下才直接清理（手动停止游戏时）
+        if (!delayedCleanupScheduled) {
+            cleanupAllPlayers(server);
+            broadcastMessage("§6§l生物大逃杀 §c已停止！");
+            broadcastMessage("§a所有玩家已清理背包和经验，并传送到出生点附近。");
+        } else {
+            broadcastMessage("§6§l生物大逃杀 §c已停止！");
+        }
     }
     
     /**
      * 游戏tick更新
      */
     public void tick() {
-        if (!gameActive) {
+        MinecraftServer server = getServer();
+        if (server == null) {
             return;
         }
         
-        MinecraftServer server = getServer();
-        if (server == null) {
+        // 处理延迟清理倒计时
+        if (delayedCleanupScheduled) {
+            cleanupCountdown--;
+            
+            // 每秒显示倒计时（每20 ticks）
+            if (cleanupCountdown % 20 == 0 && cleanupCountdown > 0) {
+                int secondsLeft = cleanupCountdown / 20;
+                broadcastMessage("§c§l" + secondsLeft + "秒后清理和传送...");
+            }
+            
+            // 倒计时结束，执行清理
+            if (cleanupCountdown <= 0) {
+                delayedCleanupScheduled = false;
+                cleanupAllPlayers(server);
+                stopGame(server);
+                return;
+            }
+        }
+        
+        if (!gameActive) {
             return;
         }
         
@@ -383,8 +416,88 @@ public class GameManager {
             );
         }
         
-        // 停止游戏
-        stopGame(server);
+        // 延迟5秒后清理所有玩家状态并停止游戏
+        scheduleDelayedCleanup(server);
+    }
+    
+    /**
+     * 安排延迟清理（5秒后执行）
+     */
+    private void scheduleDelayedCleanup(MinecraftServer server) {
+        delayedCleanupScheduled = true;
+        cleanupCountdown = 100; // 5秒 = 100 ticks (20 ticks/秒)
+        
+        // 显示倒计时消息
+        broadcastMessage("§e5秒后将清理所有玩家状态并传送到出生点...");
+    }
+    
+    /**
+     * 清理所有玩家的状态并传送到出生点附近
+     */
+    private void cleanupAllPlayers(MinecraftServer server) {
+        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            // 清理背包
+            player.getInventory().clear();
+            
+            // 重置经验等级和经验值
+            player.setExperienceLevel(0);
+            player.setExperiencePoints(0);
+            
+            // 恢复血量和饱食度
+            player.setHealth(player.getMaxHealth());
+            player.getHungerManager().setFoodLevel(20);
+            player.getHungerManager().setSaturationLevel(5.0f);
+            
+            // 移除所有状态效果
+            player.clearStatusEffects();
+            
+            // 随机传送到出生点附近（半径50格内）
+            teleportPlayerNearSpawn(server, player);
+            
+            player.sendMessage(Text.literal("§a你的背包和经验已被清理，已传送到出生点附近。"), false);
+        }
+    }
+    
+    /**
+     * 将玩家传送到世界出生点附近的随机位置
+     */
+    private void teleportPlayerNearSpawn(MinecraftServer server, ServerPlayerEntity player) {
+        try {
+            // 获取世界出生点
+            var overworld = server.getOverworld();
+            var spawnPos = overworld.getSpawnPos();
+            
+            // 在出生点周围50格半径内随机选择位置
+            int radius = 50;
+            int randomX = spawnPos.getX() + ThreadLocalRandom.current().nextInt(-radius, radius + 1);
+            int randomZ = spawnPos.getZ() + ThreadLocalRandom.current().nextInt(-radius, radius + 1);
+            
+            // 找到合适的Y坐标（地面上方）
+            int safeY = overworld.getTopY(randomX, randomZ) + 1;
+            
+            // 确保Y坐标在合理范围内
+            safeY = Math.max(safeY, overworld.getBottomY() + 10);
+            safeY = Math.min(safeY, overworld.getTopY() - 10);
+            
+            // 传送玩家
+            player.teleport(overworld, randomX + 0.5, safeY, randomZ + 0.5, 0.0f, 0.0f);
+            
+            // 播放传送音效
+            player.getWorld().playSound(
+                null,
+                player.getBlockPos(),
+                SoundEvents.ENTITY_ENDERMAN_TELEPORT,
+                net.minecraft.sound.SoundCategory.PLAYERS,
+                1.0F,
+                1.0F
+            );
+        } catch (Exception e) {
+            KillingGameMod.LOGGER.error("传送玩家时出错: " + e.getMessage(), e);
+            // 如果传送失败，尝试传送到默认出生点
+            var overworld = server.getOverworld();
+            var spawnPos = overworld.getSpawnPos();
+            player.teleport(overworld, spawnPos.getX() + 0.5, spawnPos.getY() + 1, spawnPos.getZ() + 0.5, 0.0f, 0.0f);
+        }
     }
     
     /**
@@ -475,6 +588,11 @@ public class GameManager {
      * 获取随机目标实体类型
      */
     private EntityType<?> getRandomTarget() {
+        // 如果所有实体目标都被使用了，重置列表
+        if (usedEntityTargets.size() >= possibleTargets.size()) {
+            usedEntityTargets.clear();
+        }
+        
         EntityType<?> target;
         do {
             target = possibleTargets.get(ThreadLocalRandom.current().nextInt(possibleTargets.size()));
