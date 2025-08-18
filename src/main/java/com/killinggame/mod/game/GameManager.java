@@ -17,6 +17,9 @@ import net.minecraft.util.Formatting;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.world.Heightmap;
+import net.minecraft.util.math.BlockPos;
+import java.util.Set;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -473,14 +476,14 @@ public class GameManager {
             int randomZ = spawnPos.getZ() + ThreadLocalRandom.current().nextInt(-radius, radius + 1);
             
             // 找到合适的Y坐标（地面上方）
-            int safeY = overworld.getTopY(randomX, randomZ) + 1;
+            int safeY = overworld.getTopY(Heightmap.Type.MOTION_BLOCKING, randomX, randomZ) + 1;
             
             // 确保Y坐标在合理范围内
             safeY = Math.max(safeY, overworld.getBottomY() + 10);
-            safeY = Math.min(safeY, overworld.getTopY() - 10);
+            safeY = Math.min(safeY, overworld.getLogicalHeight() - 10);
             
             // 传送玩家
-            player.teleport(overworld, randomX + 0.5, safeY, randomZ + 0.5, 0.0f, 0.0f);
+            player.teleport(overworld, randomX + 0.5, safeY, randomZ + 0.5, Set.of(), 0.0f, 0.0f, false);
             
             // 播放传送音效
             player.getWorld().playSound(
@@ -494,9 +497,9 @@ public class GameManager {
         } catch (Exception e) {
             KillingGameMod.LOGGER.error("传送玩家时出错: " + e.getMessage(), e);
             // 如果传送失败，尝试传送到默认出生点
-            var overworld = server.getOverworld();
-            var spawnPos = overworld.getSpawnPos();
-            player.teleport(overworld, spawnPos.getX() + 0.5, spawnPos.getY() + 1, spawnPos.getZ() + 0.5, 0.0f, 0.0f);
+            var overworldFallback = server.getOverworld();
+            var spawnPosFallback = overworldFallback.getSpawnPos();
+            player.teleport(overworldFallback, spawnPosFallback.getX() + 0.5, spawnPosFallback.getY() + 1, spawnPosFallback.getZ() + 0.5, Set.of(), 0.0f, 0.0f, false);
         }
     }
     
